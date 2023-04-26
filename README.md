@@ -4,7 +4,7 @@ Code for paper _Reinforcement Learning with Fast and Forgetful Memory_, where we
 ## Quickstart
 If you want to use FFM in your project, clone and install the standalone module
 ```python
-git clone https://github.com/smorad/ffm
+git clone https://github.com/proroklab/ffm
 cd ffm/standalone && pip install .
 ```
 Then you can utilize `FFM` or `DropInFFM`. `FFM` is more flexible and has a cleaner interace (and is a little bit faster too), but `DropInFFM` follows the `torch.nn.GRU` interface very closely, so it can function as a drop-in RNN replacement.
