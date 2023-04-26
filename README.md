@@ -28,14 +28,14 @@ next_markov_states, next_recurrent_state = diffm(markov_states, recurrent_state)
 ## Repository Structure
 This repository may be used to reproduce all experiments and plots. Once the review period is over, we will make our Wandb public, but until then we will keep it private to avoid breaking the double-blind review, and so some logging tools may not work.
 
-`models` contains the FFM models used in all of our experiments
-`ppo.py` runs the POPGym PPO experiments for FFM, including all ablations
-`popgym` contains POPGym at the commit we evaluated against
-`pomdp-baselines` contains POMDP baselines at the commit we evaluated against
-`plotting` contains all the scripts used to generate plots in the paper
-`standalone` contains a standalone implementation of FFM for use in other projects
-`benchmark.py` contains code to benchmark the wall-clock efficiency and memory usage of models
-`aggregations.py` contains various aggregators, such as the one proposed in FFM
+- `models` contains the FFM models used in all of our experiments
+- `ppo.py` runs the POPGym PPO experiments for FFM, including all ablations
+- `popgym` contains POPGym at the commit we evaluated against
+- `pomdp-baselines` contains POMDP baselines at the commit we evaluated against
+- `plotting` contains all the scripts used to generate plots in the paper
+- `standalone` contains a standalone implementation of FFM for use in other projects
+- `benchmark.py` contains code to benchmark the wall-clock efficiency and memory usage of models
+- `aggregations.py` contains various aggregators, such as the one proposed in FFM
 
 ## Reproducing POPGym and Ablations
 To rerun ablations:
