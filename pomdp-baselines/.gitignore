@@ -1,0 +1,19 @@
+.DS_Store
+.vscode/
+__pycache__/
+.ipynb_checkpoints
+*.pyc
+.cache/
+
+
+# logs, a soft link to disk
+logs
+logs/
+data/
+debug/
+scripts/tmp_configs/
+
+# singularity
+*.sif
+
+third_party/

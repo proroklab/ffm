@@ -1,0 +1,8 @@
+setup.py
+ffm/__init__.py
+ffm/ffa.py
+ffm/ffm.py
+ffm_torch.egg-info/PKG-INFO
+ffm_torch.egg-info/SOURCES.txt
+ffm_torch.egg-info/dependency_links.txt
+ffm_torch.egg-info/top_level.txt
