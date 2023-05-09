@@ -210,7 +210,7 @@ class TensorBoardOutputFormat(KVWriter):
 class WandbOutputFormat(KVWriter):
     def __init__(self, dir):
         string = dir.split('/')
-        task_type = 'FFM_' + string[1]
+        task_type = 'FFM_extra_' + string[1]
         task = '-'.join(string[2:4])
         model = string[4]
         hparams = string[5:]
