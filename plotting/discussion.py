@@ -25,7 +25,7 @@ def repeat_prev(runs):
     runs = runs[runs['run_id'] == '0318d_00000']
     #runs = runs[runs['run_id'].isin(['0318d_00000', '0318d_00001', '0318d_00002'])]
 
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(6, 4))
     #ax = sb.histplot(
     #    runs, x="Epoch", y=r"$t_\omega$", bins=32,
     #)
@@ -44,7 +44,7 @@ def repeat_prev(runs):
     plt.legend()
     plt.tight_layout()
     plt.savefig(SAVEDIR + "/repeat_prev_w.pdf", bbox_inches="tight")
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(6, 4))
     #ax = sb.histplot(
     #    runs, x="Epoch", y=r"$t_\alpha$", bins=32,
         #binrange=((0, 228), (0, 250))
@@ -90,14 +90,16 @@ def repeat_prev_init():
     #runs.loc[runs['name'] == 'RepeatPreviousMedium-RayFFM_32_104', 'Model'] = r'FFM $t_\alpha = 32, t_\gamma = 104$'
     runs.loc[runs['name'] == 'RepeatPreviousMedium-RayFFM_32_104', 'Model'] = r'FFM-32,104'
     runs.loc[runs['name'] == 'RepeatPreviousMedium-RayFFM', 'Model'] = r'FFM-1,1024'
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(6, 4))
+    runs = runs.rename(columns={"MMER": "Reward"})
     ax = sb.lineplot(
-        runs, x="Epoch", y="MMER", hue="Model", units="run_id", estimator=None,
+        runs, x="Epoch", y="Reward", hue="Model", units="run_id", estimator=None, hue_order=["FFM-32,104", "FFM-1,1024", "GRU"]
     )
-    plt.legend(loc="lower right", ncol=3)
+    plt.legend(loc="lower right", ncol=1)
     #plt.setp(ax.get_legend().get_texts(), fontsize='8') # for legend text
     #plt.setp(ax.get_legend().get_title(), fontsize='8') # for legend title
     #plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+    #sb.move_legend(ax, bbox_to_anchor=(1, 1), loc='upper left')
     plt.tight_layout()
     plt.savefig(SAVEDIR + "/repeat_prev_init.pdf", bbox_inches="tight")
 

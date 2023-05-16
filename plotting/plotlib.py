@@ -11,7 +11,9 @@ import os
 
 model_renames = {
     "FastWeightProgrammer": "FWP",
+    #"DeepFastWeightProgrammer": "DFWP",
     "LinearAttention": "FART",
+    #"DeepLinearAttention": "DFART",
     "MLP": "PosMLP",
     "BasicMLP": "MLP",
     "Frameconv": "TCN",
