@@ -2,7 +2,3 @@
 	path = popgym
 	url = git@github.com:proroklab/popgym.git
 	branch = 689d89bd7f6919a1aaecb1319beb8369b0f40de5
-[submodule "pomdp-baselines"]
-	path = pomdp-baselines
-	url = git@github.com:smorad/pomdp-baselines.git
-    branch = master
