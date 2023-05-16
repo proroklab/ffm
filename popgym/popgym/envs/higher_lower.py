@@ -1,7 +1,9 @@
-from typing import Any, Dict, Optional, Tuple, Union
+"""Guess if the next card in the deck is higher or lower than the last card drawn."""
+from typing import Any, Dict, Optional, Tuple
 
-import gym
+import gymnasium as gym
 import numpy as np
+from gymnasium.core import ActType, ObsType
 
 from popgym.core.deck import RANKS, Deck
 from popgym.core.env import POPGymEnv
@@ -17,7 +19,9 @@ def value_fn(hand):
 
 
 class HigherLower(POPGymEnv):
-    """A game of higher/lower. Given a deck of cards, the agent predicts whether the
+    """A game of higher/lower
+
+    Given a deck of cards, the agent predicts whether the
     next card drawn from the deck is higher or lower than the last card drawn from
     the deck. A push results in zero reward, while a correct/incorrect guess result
     in 1/deck_size and -1/deck_size reward. The agent can learn to count cards to
@@ -51,9 +55,9 @@ class HigherLower(POPGymEnv):
     def get_state(self):
         return (self.state.copy() / 4 / self.num_decks).astype(np.float32)
 
-    def step(self, action):
+    def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
         guess_higher = action == 0
-        done = len(self.deck) <= 1
+        terminated = len(self.deck) <= 1
 
         self.deck.deal("player", 1)
         assert self.deck.hand_size("player") == 2
@@ -71,7 +75,7 @@ class HigherLower(POPGymEnv):
         self.deck.discard("player", 0)
         obs = self.deck.show("player", ["ranks_idx"]).item()
 
-        return obs, reward, done, {}
+        return obs, reward, terminated, False, {}
 
     def render(self, mode="ascii"):
         return self.deck.visualize_idx(self.deck["player"])
@@ -80,9 +84,8 @@ class HigherLower(POPGymEnv):
         self,
         *,
         seed: Optional[int] = None,
-        return_info: bool = False,
         options: Optional[dict] = None,
-    ) -> Union[gym.core.ObsType, Tuple[gym.core.ObsType, Dict[str, Any]]]:
+    ) -> Tuple[gym.core.ObsType, Dict[str, Any]]:
         super().reset(seed=seed)
         self.deck.reset(rng=self.np_random)
         self.deck.deal("player", 1)
@@ -97,10 +100,7 @@ class HigherLower(POPGymEnv):
         obs = self.deck.show("player", ["ranks_idx"]).item()
         self.state[obs] = 1
         viz = np.concatenate(self.deck.show("player", ["suits", "ranks"]))
-        if return_info:
-            return obs, {"card": viz}
-
-        return obs
+        return obs, {"card": viz}
 
 
 class HigherLowerEasy(HigherLower):

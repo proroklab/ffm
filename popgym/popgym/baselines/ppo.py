@@ -15,10 +15,13 @@ from popgym.baselines.ray_models.ray_diffnc import DiffNC  # noqa: F401
 from popgym.baselines.ray_models.ray_elman import Elman
 from popgym.baselines.ray_models.ray_frameconv import Frameconv
 from popgym.baselines.ray_models.ray_framestack import Framestack
-from popgym.baselines.ray_models.ray_fwp import FastWeightProgrammer
+from popgym.baselines.ray_models.ray_fwp import (
+    DeepFastWeightProgrammer,
+    FastWeightProgrammer,
+)
 from popgym.baselines.ray_models.ray_gru import GRU
 from popgym.baselines.ray_models.ray_indrnn import IndRNN
-from popgym.baselines.ray_models.ray_linear_attention import LinearAttention
+from popgym.baselines.ray_models.ray_linear_attention import LinearAttention, DeepLinearAttention
 from popgym.baselines.ray_models.ray_lmu import LMU
 from popgym.baselines.ray_models.ray_lstm import LSTM
 from popgym.baselines.ray_models.ray_mlp import MLP, BasicMLP
@@ -29,13 +32,13 @@ from popgym.core.env import POPGymEnv
 def main():
     env_names: List[Any] = []
 
-    env_types = os.environ.get("POPGYM_EXPERIMENT", "ALL_ENVS")
+    env_types = os.environ.get("POPGYM_EXPERIMENT", "ALL")
     desired_models = os.environ.get("POPGYM_MODELS", "ALL")
     num_splits = int(os.environ.get("POPGYM_NUM_SPLITS", 1))
     split_id = int(os.environ.get("POPGYM_SPLIT_ID", 0))
     project_id = os.environ.get("POPGYM_PROJECT", "popgym-debug")
     gpu_per_worker = float(os.environ.get("POPGYM_GPU", 0.25))
-    max_steps = int(os.environ.get("POPGYM_STEPS", 10e6))
+    max_steps = int(os.environ.get("POPGYM_STEPS", 15e6))
     storage_path = os.environ.get("POPGYM_STORAGE", "/tmp/ray_results")
     num_samples = int(os.environ.get("POPGYM_SAMPLES", 1))
 
@@ -56,7 +59,7 @@ def main():
         return wrappers.Antialias(wrappers.PreviousAction(env))
 
     # Register all envs with ray
-    envs = popgym.ALL_ENVS
+    envs = popgym.envs.ALL
     for cls, info in envs.items():
         env_name = info["id"]
         register_env(env_name, lambda x: wrap(cls()))
@@ -66,7 +69,7 @@ def main():
     for e in env_types.split(","):
         # getattr will either return a dict of {class: info[name}}
         # or just a class
-        res = getattr(popgym, e)
+        res = getattr(popgym.envs, e)
         if isinstance(res, dict):
             desired_envs = list(res.keys())
         else:
@@ -81,6 +84,8 @@ def main():
     attn_models = [
         LinearAttention,
         FastWeightProgrammer,
+        DeepFastWeightProgrammer,
+        DeepLinearAttention,
     ]
     rnn_models = [LSTM, GRU, Elman, LMU, IndRNN, DiffNC]
     conv_models = [S4D]

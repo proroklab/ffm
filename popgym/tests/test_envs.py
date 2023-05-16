@@ -1,12 +1,12 @@
 import pytest
-from gym.utils.env_checker import check_env
+from gymnasium.utils.env_checker import check_env
 
-from popgym import ALL_ENVS
+from popgym import envs
 
 
 class TestEnvs:
-    @pytest.mark.parametrize("env", ALL_ENVS)
+    @pytest.mark.parametrize("env", envs.ALL)
     def test_no_warn(self, env):
         e = env()
         e.reset()
-        check_env(e)
+        check_env(e, skip_render_check=True)
