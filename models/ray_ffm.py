@@ -10,7 +10,6 @@ from ray.rllib.algorithms.callbacks import DefaultCallbacks
 import wandb
 
 from .ffm_outer import FFM
-from .ffm_hadamard import FFMHadamard
 from .ffm_outer_double import FFMDouble
 
 
@@ -108,55 +107,6 @@ class RayFFM(BaseModel):
         state = [torch.view_as_real(s) for s in state]
         return z, state
 
-
-class RayFFMHadamard(BaseModel):
-    MODEL_CONFIG = {
-        "hidden_size": 256,
-        "memory_size": 256,
-        "context_size": 1,
-        "record_stats": True,
-        "agg_kwargs": {},
-    }
-    def __init__(
-        self,
-        obs_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
-        num_outputs: int,
-        model_config: Dict[str, Any],
-        name: str,
-        **custom_model_kwargs,
-    ):
-        super().__init__(obs_space, action_space, num_outputs, model_config, name)
-        self.core = FFMHadamard(
-            input_size=self.cfg["preprocessor_output_size"],
-            hidden_size=self.cfg["hidden_size"],
-            memory_size=self.cfg["memory_size"],
-            output_size=self.cfg["hidden_size"],
-            context_size=self.cfg["context_size"],
-            stats=self.cfg["record_stats"],
-            **self.cfg["agg_kwargs"],
-        )
-        print(self.core)
-
-    def initial_state(self) -> List[torch.Tensor]:
-        return [
-            # Last dim is real and imag
-            torch.zeros(1, self.cfg["memory_size"] // 2, 1, 2)
-            for i in range(self.core.num_states)
-        ]
-
-    def forward_memory(
-        self,
-        z: torch.Tensor,
-        state: List[torch.Tensor],
-        t_starts: torch.Tensor,
-        seq_lens: torch.Tensor,
-    ) -> Tuple[torch.Tensor, List[torch.Tensor]]:
-
-        state = [torch.view_as_complex(s) for s in state]
-        z, state = self.core(z, state)
-        state = [torch.view_as_real(s) for s in state]
-        return z, state
 
 class RayFFMDouble(BaseModel):
     MODEL_CONFIG = {
