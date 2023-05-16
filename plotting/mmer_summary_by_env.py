@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import os
 from matplotlib import ticker 
+import getpass
 
 
-WORKDIR = "/Users/smorad/data/laplace"
+WORKDIR = f"/Users/{getpass.getuser()}/data/laplace"
 SAVEDIR = WORKDIR + "/plots" + "/popgym"
 AGG_MAP = {
     "Base Env": "first", 

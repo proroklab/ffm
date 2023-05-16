@@ -4,8 +4,10 @@ import seaborn as sb
 import matplotlib.pyplot as plt
 import plotlib as pl
 import numpy as np
+import getpass
 
-WORKDIR = "/Users/smorad/data/laplace"
+
+WORKDIR = f"/Users/{getpass.getuser()}/data/laplace"
 SAVEDIR = WORKDIR + "/plots"
 CSVPATH = WORKDIR + "/throughput.csv"
 

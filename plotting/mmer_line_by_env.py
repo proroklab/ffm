@@ -3,9 +3,10 @@
 import plotlib as pl
 import matplotlib.pyplot as plt
 import seaborn as sb
+import getpass
 
 
-WORKDIR = "/Users/smorad/data/laplace"
+WORKDIR = f"/Users/{getpass.getuser()}/data/laplace"
 SAVEDIR = WORKDIR + "/plots"
 
 

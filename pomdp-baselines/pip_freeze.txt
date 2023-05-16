@@ -5,6 +5,7 @@ appdirs==1.4.4
 attrs==22.2.0
 Box2D==2.3.2
 box2d-py==2.3.5
+box2d-kengz
 certifi==2022.12.7
 cffi==1.15.1
 charset-normalizer==3.1.0
@@ -20,7 +21,7 @@ docker-pycreds==0.4.0
 einops==0.6.0
 exceptiongroup==1.1.0
 fasteners==0.18
--e git+ssh://git@github.com/smorad/laplace.git@d62ac96d7bc47c86be5c0d8c550e5e54af7d3bd9#egg=ffm_torch&subdirectory=standalone
+-e ../standalone 
 filelock==3.9.0
 flann==1.6.13
 fonttools==4.39.3
@@ -47,10 +48,8 @@ markdown-it-py==2.2.0
 matplotlib==3.7.1
 mdurl==0.1.2
 msgpack==1.0.4
-mujoco==2.2.0
-mujoco-py==1.50.1.68
 networkx==3.0
-numpy==1.22.0
+numpy==1.24.3
 opencv-python==4.7.0.72
 opt-einsum==3.3.0
 packaging==23.0

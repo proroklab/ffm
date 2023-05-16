@@ -7,12 +7,13 @@ import seaborn as sb
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib import ticker 
+import getpass
 
 
 a_keys = {f'agg_a{i}': f'agg_a{i}' for i in range(32)} 
 w_keys = {f'agg_w{i}': f'agg_w{i}' for i in range(4)}
 keys = {**a_keys, **w_keys}
-WORKDIR = "/Users/smorad/data/laplace"
+WORKDIR = f"/Users/{getpass.getuser()}/data/laplace"
 SAVEDIR = WORKDIR + "/plots"
 sb.set(rc={'text.usetex' : True})
 sb.set_style("darkgrid")
