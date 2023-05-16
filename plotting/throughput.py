@@ -4,14 +4,16 @@ import seaborn as sb
 import matplotlib.pyplot as plt
 import plotlib as pl
 import numpy as np
+import getpass
 
-WORKDIR = "/Users/smorad/data/laplace"
+
+WORKDIR = f"/Users/{getpass.getuser()}/data/laplace"
 SAVEDIR = WORKDIR + "/plots"
 CSVPATH = WORKDIR + "/throughput.csv"
 
 df = pd.read_csv(CSVPATH)
 df["color"] = df["model"] == "RayFFM"
-df = df.rename(columns={"model": "Model", "mem (MB)": "Mem. (MB)", "MMER": "Reward"})
+df = df.rename(columns={"model": "Model", "mem (MB)": "Peak Memory (MB)", "MMER": "Reward"})
 df = df.replace(pl.model_renames)
 
 sb.set(font_scale=1.5)
@@ -47,9 +49,9 @@ plt.clf()
 
 plt.figure(figsize=(5, 5))
 mem = df[(df["mode"] == "train") & (df["device"] == "cuda")]
-#mem = mem.sort_values(by="Mem. (MB)")
-order = mem.groupby('Model').mean(numeric_only=True).sort_values(by="Mem. (MB)").index
-ax = sb.barplot(y="Model", x="Mem. (MB)", data=mem, hue="color", dodge=False, order=order, errorbar=None)
+#mem = mem.sort_values(by="Peak Memory (MB)")
+order = mem.groupby('Model').mean(numeric_only=True).sort_values(by="Peak Memory (MB)").index
+ax = sb.barplot(y="Model", x="Peak Memory (MB)", data=mem, hue="color", dodge=False, order=order, errorbar=None)
 ax.legend_.remove()
 ax.set(ylabel=None)
 plt.tight_layout()
@@ -85,7 +87,7 @@ plt.figure(figsize=(5, 5))
 projects = {"popgym-public": [15e6, 228], "FFM_4b2": [15e6, 228]}
 #projects = {"FFM_4b2": [15e6, 228]}
 runs, summary = pl.build_projects(projects, WORKDIR, clean=False)
-summary = summary.rename(columns={"model": "Model", "mem (MB)": "Mem. (MB)", "MMER": "Reward"})
+summary = summary.rename(columns={"model": "Model", "mem (MB)": "Peak Memory (MB)", "MMER": "Reward"})
 summary = summary.replace(pl.model_renames)
 mask = summary['trial_idx'] < 3
 summary["color"] = summary["Model"] == "FFM"

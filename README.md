@@ -32,24 +32,27 @@ This repository may be used to reproduce all experiments and plots. Once the rev
 - `ppo.py` runs the POPGym PPO experiments for FFM, including all ablations
 - `popgym` contains POPGym at the commit we evaluated against
 - `pomdp-baselines` contains POMDP baselines at the commit we evaluated against
-- `plotting` contains all the scripts used to generate plots in the paper
-- `standalone` contains a standalone implementation of FFM for use in other projects
+- `plotting` contains all the scripts used to generate plots in the paper, only tested on MacOS. These will not work until the raw data is publically released via wandb.
+- `standalone` contains a standalone implementation of FFM for use in other projects -- it is pip installable with only torch as a dependency
 - `benchmark.py` contains code to benchmark the wall-clock efficiency and memory usage of models
 - `aggregations.py` contains various aggregators, such as the one proposed in FFM
 
 ## Reproducing POPGym and Ablations
 To rerun ablations:
-First, go into `popgym` and pip install following the instructions. Then:
+First, go into `popgym` and pip install following the instructions, it should be something like `pip install ".[baselines,navigation]"`. Then:
 `python POPGYM_MODELS=RayFFM,RayFFMNoOscillate,RayFFMNoLearnOscillate,RayFFMNoDecay,RayFFMNoLearnDecay,RayFFMNoInGate,RayFFMNoOutGate ppo.py`
+Make sure you are running the `ppo.py` in the FFM root directory, not the `ppo.py` in the popgym directory! 
+
+If you run into the error about `tensorflow_probability` not being installed, that is a ray issue. You can either install it, or go into the file where the error occurs and replace `import tensorflow_probability as tfp` with `tfp = None`.
 
 ## Reproducing Efficiency Table
 To rerun wall-clock time and memory efficiency:
 `python benchmark.py`
-the results will be saved in `throughput.csv`
+the results will be saved in `throughput.csv`. This requires that `popgym` is installed and working.
 
 ## Reproducing POMDP-Baselines
 POPGym and POMDP-Baselines have conflicting python package versions. For this reason, we suggest using separate docker or conda containers for reproducing this. We had trouble installing their original dependencies, but we provide a pip freeze such that you can install the packages necessary to run our portion of the experiments using
-`pip install -r pomdp-baselines/pip_freeze.txt`. You will also need to install MuJoCo. Then, follow their instructions for setting up correct python paths. Once this works, call
+`pip install -r pomdp-baselines/pip_freeze.txt`. Then, follow their instructions for setting up correct python paths. We sometimes run into issues installing this, based on the OS and preinstalled packages. That said, any errors we ran into were fixed with a simple google search! If this annoys you, please ask the authors of POMDP-Baselines to update their packages to ones that are still available on pip/conda. Once this works, call
 `python pomdp-baselines/gru_vs_ffm.sh <RANDOM_SEED> <CUDA_DEVICE> <CONFIG_GROUP> `
 For example,
 ```bash
