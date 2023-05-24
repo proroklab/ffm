@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import plotnine as p9
 import seaborn as sb
 import os
+import getpass
 
-WORKDIR = "/Users/smorad/data/laplace"
+WORKDIR = f"/Users/{getpass.getuser()}/data/laplace"
 SAVEDIR = WORKDIR + "/plots"
 AGG_MAP = {
     "Base Env": "first", 
