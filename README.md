@@ -52,7 +52,7 @@ the results will be saved in `throughput.csv`. This requires that `popgym` is in
 
 ## Reproducing POMDP-Baselines
 POPGym and POMDP-Baselines have conflicting python package versions. For this reason, we suggest using separate docker or conda containers for reproducing this. We had trouble installing their original dependencies, but we provide a pip freeze such that you can install the packages necessary to run our portion of the experiments using
-`pip install -r pomdp-baselines/pip_freeze.txt`. Then, follow their instructions for setting up correct python paths. We sometimes run into issues installing this, based on the OS and preinstalled packages. That said, any errors we ran into were fixed with a simple google search! If this annoys you, please ask the authors of POMDP-Baselines to update their packages to ones that are still available on pip/conda. Once this works, call
+`pip install -r pomdp-baselines/pip_freeze.txt`. Then, follow their instructions for setting up correct python paths. We sometimes run into issues installing this, based on the OS and preinstalled packages. If you run into an error with box2d, you will need to `pip install --force-reinstall box2d-kengz`. That said, any others errors we ran into were fixed with a simple google search! If this annoys you, please ask the authors of POMDP-Baselines to update their packages to ones that are still available on pip/conda. Once this works, call
 `python pomdp-baselines/gru_vs_ffm.sh <RANDOM_SEED> <CUDA_DEVICE> <CONFIG_GROUP> `
 For example,
 ```bash
