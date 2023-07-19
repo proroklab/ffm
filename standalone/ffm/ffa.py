@@ -3,6 +3,7 @@ import torch
 from torch import nn
 
 
+
 class FFA(nn.Module):
     def __init__(
         self,
@@ -123,26 +124,24 @@ class FFA(nn.Module):
         self.state_offset: torch.Tensor
         # Buffers
         self.register_buffer("one", torch.tensor([1.0], dtype=torch.float))
+        # n, n - 1, ..., 1, 0
         self.register_buffer("inner_idx", torch.arange(max_len, dtype=dtype).flip(0))
+        # 0, -1, ..., -n + 1, -n
         self.register_buffer("outer_idx", -self.inner_idx)
+        # 1, 2, ... n + 1
         self.register_buffer("state_offset", torch.arange(1, max_len + 1, dtype=dtype))
 
     def extra_repr(self):
         return f"in_features={self.memory_size}, out_features=({self.memory_size}, {self.context_size})"
 
-    def gamma(self, t_minus_i: torch.Tensor) -> torch.Tensor:
-        """Gamma function from the paper
-
-        Args:
-            t_minus_i: 1D tensor of relative time indices (can be discrete or cont.)
-
-        Returns:
-            gamma^t for t in t_minus_i
-        """
+    def log_gamma(self, t_minus_i: torch.Tensor, clamp: bool = True) -> torch.Tensor:
         assert t_minus_i.dim() == 1
         T = t_minus_i.shape[0]
-        self.a.data = self.a.data.clamp(min=-self.limit, max=-1e-8)
-        a = self.a.clamp(min=-self.limit, max=-1e-8)
+        if clamp:
+            self.a.data = self.a.data.clamp(min=-self.limit, max=-1e-8)
+            a = self.a.clamp(min=-self.limit, max=-1e-8)
+        else:
+            a = self.a
         b = self.b
         if not self.oscillate or not self.learn_oscillate:
             b = b.detach()
@@ -153,8 +152,25 @@ class FFA(nn.Module):
             a.reshape(1, 1, -1, 1),
             b.reshape(1, 1, 1, -1),
         )
-        out = torch.exp(exp * t_minus_i.reshape(1, T, 1, 1))
+        out = exp * t_minus_i.reshape(1, T, 1, 1)
         return out
+
+    def gamma(self, t_minus_i: torch.Tensor, clamp: bool = True) -> torch.Tensor:
+        """Gamma function from the paper
+
+        Args:
+            t_minus_i: 1D tensor of relative time indices (can be discrete or cont.)
+            log: Whether to return the gamma or log of gamma
+
+        Returns:
+            gamma^t for t in t_minus_i
+        """
+        return self.log_gamma(t_minus_i, clamp=clamp).exp()
+
+    def compute_z(self, x):
+        # TODO: See https://math.stackexchange.com/questions/1844525/logarithm-of-a-sum-or-addition
+        B, T, F, D = x.shape
+        return torch.cumsum(self.gamma(self.inner_idx[:T]) * x, dim=1)
 
     def batched_recurrent_update(
         self, x: torch.Tensor, memory: torch.Tensor
@@ -169,7 +185,13 @@ class FFA(nn.Module):
             state of [B, n-k, memory_size, context_size]
         """
         B, T, F, D = x.shape
-        z = torch.cumsum(self.gamma(self.inner_idx[:T]) * x, dim=1)
+        # inner_idx: n, n - 1, ..., 1, 0
+        # outer_idx: -n, -n + 1, ... -1, 0
+        # state_offset: 1, 2, ... n + 1
+
+        # (gamma^{n}, gamma^{n-1}, ... gamma^{0}) \odot (x0, x1, ... xn)
+        #z = torch.cumsum(self.gamma(self.inner_idx[:T]) * x, dim=1)
+        z = self.compute_z(x)
         memory = self.gamma(self.outer_idx[:T]) * z + memory * self.gamma(
             self.state_offset[:T]
         )
@@ -178,7 +200,7 @@ class FFA(nn.Module):
 
     def single_step_update(self, x: torch.Tensor, memory: torch.Tensor) -> torch.Tensor:
         """A fast recurrent update for a single timestep"""
-        return x + memory * self.gamma(self.one)
+        return x + memory * self.gamma(self.one, clamp=False)
 
     def forward(self, x: torch.Tensor, memory: torch.Tensor) -> torch.Tensor:
         """
@@ -212,3 +234,55 @@ class FFA(nn.Module):
                 memory = self.batched_recurrent_update(chunk, memory[:, -1:])
                 states.append(memory)
             return torch.cat(states, dim=1)
+
+
+class LogspaceFFA(FFA):
+    """FFA but designed for very long sequences using logspace arithmetic"""
+    # TODO: gamma is limited but need not be here
+    def set_nonzero(self, x, eps=1e-10):
+        """Set values (of memory) to be nonzero to prevent inf when taking the log"""
+        x.real[x.real == 0] = eps
+        mask = x.real.abs() < eps
+        x.real[mask] = x.real[mask].sign() * eps
+        return x
+
+    def compute_z(self, x):
+        # eq 4. https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
+        # https://math.stackexchange.com/questions/1538477/log-of-summation-expression
+        B, T, F, D = x.shape
+        log_divisor = self.log_gamma(self.inner_idx[T-1:T])
+        log_z = log_divisor + torch.log(
+            torch.cumsum(
+                (x + self.log_gamma(self.inner_idx[:T]) - log_divisor).exp(),
+            dim=1),
+        )   
+        return log_z
+
+    def batched_recurrent_update(
+        self, x: torch.Tensor, memory: torch.Tensor
+    ) -> torch.Tensor:
+        """Given x_{k:n} and s_{k-1}, compute s{k:n}
+
+        Args:
+            x: input of [B, T, memory_size]
+            memory: state of [B, 1, memory_size, context_size]
+
+        Returns
+            state of [B, n-k, memory_size, context_size]
+        """
+        B, T, F, D = x.shape
+        # inner_idx: n, n - 1, ..., 1, 0
+        # outer_idx: -n, -n + 1, ... -1, 0
+        # state_offset: 1, 2, ... n + 1
+
+        # (gamma^{n}, gamma^{n-1}, ... gamma^{0}) \odot (x0, x1, ... xn)
+        log_z = self.compute_z(x)
+        memory = torch.exp(self.log_gamma(self.outer_idx[:T], clamp=False) + log_z) + torch.exp(self.set_nonzero(memory).log() + self.log_gamma(
+            self.state_offset[:T], clamp=False
+        ))
+
+        return memory.to(torch.complex64)
+
+    def single_step_update(self, x: torch.Tensor, memory: torch.Tensor) -> torch.Tensor:
+        """A fast recurrent update for a single timestep"""
+        return x.exp() + torch.exp(self.set_nonzero(memory).log() + self.log_gamma(self.one, clamp=False))

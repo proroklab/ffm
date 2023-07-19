@@ -26,8 +26,8 @@ os.makedirs(SAVEDIR, exist_ok=True)
 
 
 def main():
-    projects = {"popgym-public": [15e6, 228], "FFM_4b2": [15e6, 228]}
-    runs, summary = build_projects(projects, WORKDIR, clean=False)
+    projects = {"popgym-public": [15e6, 228]}#, "FFM_4b2": [15e6, 228]}
+    runs, summary = build_projects(projects, WORKDIR, multiprocess=False, clean=False)
     print(summary.groupby(["Model", "Env"]).mean().groupby("Model").mean()["MMER"])
     #nonav = summary[~summary["Env"].str.contains("Labyrinth")]
     #print(nonav.groupby(["Model", "Env"]).mean().groupby("Model").mean()["MMER"])

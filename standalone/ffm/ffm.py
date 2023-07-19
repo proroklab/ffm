@@ -1,7 +1,7 @@
-from typing import Optional, Tuple, cast
+from typing import Optional, Tuple
 import torch
 from torch import nn
-from ffm import FFA
+from ffa import FFA, LogspaceFFA
 
 
 class FFM(nn.Module):
@@ -28,6 +28,7 @@ class FFM(nn.Module):
         output_size: int,
         min_period: int = 1,
         max_period: int = 1024,
+        logspace: bool = False,
     ):
         super().__init__()
         self.input_size = input_size
@@ -37,12 +38,20 @@ class FFM(nn.Module):
         self.context_size = context_size
 
         self.pre = nn.Linear(input_size, 2 * memory_size + 2 * output_size)
-        self.ffa = FFA(
-            memory_size=memory_size,
-            context_size=context_size,
-            min_period=min_period,
-            max_period=max_period,
-        )
+        if logspace:
+            self.ffm = LogspaceFFA(
+                memory_size=memory_size,
+                context_size=context_size,
+                min_period=min_period,
+                max_period=max_period,
+            )
+        else:
+            self.ffm = FFA(
+                memory_size=memory_size,
+                context_size=context_size,
+                min_period=min_period,
+                max_period=max_period,
+            )
         self.mix = nn.Linear(2 * memory_size * context_size, output_size)
         self.ln_out = nn.LayerNorm(output_size, elementwise_affine=False)
 
