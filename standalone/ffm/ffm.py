@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 import torch
 from torch import nn
-from ffa import FFA, LogspaceFFA
+from .ffa import FFA, LogspaceFFA
 
 
 class FFM(nn.Module):
