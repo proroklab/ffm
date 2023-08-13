@@ -39,14 +39,14 @@ class FFM(nn.Module):
 
         self.pre = nn.Linear(input_size, 2 * memory_size + 2 * output_size)
         if logspace:
-            self.ffm = LogspaceFFA(
+            self.ffa = LogspaceFFA(
                 memory_size=memory_size,
                 context_size=context_size,
                 min_period=min_period,
                 max_period=max_period,
             )
         else:
-            self.ffm = FFA(
+            self.ffa = FFA(
                 memory_size=memory_size,
                 context_size=context_size,
                 min_period=min_period,
